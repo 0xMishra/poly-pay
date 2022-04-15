@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
+    "@walletconnect/web3-provider": "^1.7.7",
     "next": "12.1.5",
     "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "react-dom": "18.0.0",
+    "web3modal": "^1.9.6"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",

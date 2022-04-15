@@ -1,8 +1,59 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import styles from "../styles/Home.module.css";
+import { TOKEN_ADDRESS, TOKEN_ABI } from "../constants/constants";
+import { useState, useEffect } from "react";
+import Web3Modal from "web3modal";
+import { ethers } from "ethers";
 
 export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [balance, setBalance] = useState(0);
+
+  const getProviderOrSigner = async (isNeedSigner) => {
+    const web3modal = new Web3Modal();
+
+    const instance = await web3modal.connect();
+    const web3Provider = new ethers.providers.Web3Provider(instance);
+    const { chainId } = await web3Provider.getNetwork();
+
+    if (chainId !== 80001) {
+      window.alert("Change the network to mumbai");
+      throw new Error("Change network to mumbai");
+    }
+    const signer = web3Provider.getSigner();
+    if (!isNeedSigner) {
+      return web3Provider;
+    }
+    return signer;
+  };
+
+  const loadBalance = async () => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const tokenContract = new ethers.Contract(
+        TOKEN_ADDRESS,
+        TOKEN_ABI,
+        signer
+      );
+      const currentBalance = await tokenContract.balanceOf(signer.getAddress());
+      const formattedBalance = ethers.utils.formatEther(currentBalance);
+      setBalance(formattedBalance);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const sendPayment = async () => {
+    try {
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    loadBalance();
+  }, []);
   return (
     <div className={styles.container}>
       <Head>
@@ -11,46 +62,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+      <main className={styles.main}>Your Balance: {balance} PAY</main>
 
       <footer className={styles.footer}>
         <a
@@ -58,12 +70,12 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
       </footer>
     </div>
-  )
+  );
 }
