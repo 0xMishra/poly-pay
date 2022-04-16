@@ -15,5 +15,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-
-//token address: 0x0dC497A2b4e3B4c58Fd8640A53C6d00510c90c11
