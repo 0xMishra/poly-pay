@@ -5,7 +5,7 @@ import Web3Modal from "web3modal";
 import { ethers } from "ethers";
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState(0);
   const [paymentInfo, setPaymentInfo] = useState({ amount: "", address: "0x" });
 
@@ -65,11 +65,14 @@ export default function Home() {
       }
       const parseAmount = ethers.utils.parseUnits(amount, "ether");
       const txn = await tokenContract.transfer(address, parseAmount);
+      setLoading(true);
+
       await txn.wait();
       loadBalance();
       currentBalance = await tokenContract.balanceOf(signer.getAddress());
       formattedBalance = ethers.utils.formatEther(currentBalance);
-      setBalance(formattedBalance);
+      setBalance(Math.round(formattedBalance * 100) / 100);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -85,28 +88,62 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        Your Balance: {balance} PAY
-        <form action="">
-          <input
-            type="text"
-            placeholder="Amount To Transfer"
-            onChange={(e) =>
-              setPaymentInfo({ ...paymentInfo, amount: e.target.value })
-            }
-          />
-          <br />
-          <input
-            type="text"
-            placeholder="Receiver's Address"
-            onChange={(e) =>
-              setPaymentInfo({ ...paymentInfo, address: e.target.value })
-            }
-          />
-          <br />
-          <button type="submit" onClick={(e) => sendPayment(e)}>
-            SEND
-          </button>
+      <main className="flex justify-center items-center flex-col w-[100vw] h-[100vh]  bg-gradient-to-b from-gray-900 to-gray-600 overflow-x-hidden">
+        <div className="flex justify-center items-center text-white">
+          <div>
+            <img
+              src="https://freesvg.org/storage/img/thumb/1525963419.png"
+              alt=""
+              className="w-10 h-10 rounded-full"
+            />
+          </div>
+          <h1 className="ml-3 text-2xl font-semibold">Polygon Pay</h1>
+        </div>
+        <form
+          action=""
+          className="bg-gray-900 w-[90vw] max-w-[500px] mt-[100px] text-white flex-col justify-center items-center flex rounded-2xl pt-2 pb-2"
+        >
+          <div className="flex justify-between items-center pt-2">
+            <p className="text-sm  mr-4">Send Token</p>
+            <p className="text-sm ml-4"> Balance: {balance} PAY</p>
+          </div>
+          <div className="w-[95%] max-w-[480px] p-2 ">
+            <div className="bg-gray-600  m-2  rounded-2xl flex justify-between">
+              <div>
+                <input
+                  type="text"
+                  placeholder="0.0"
+                  onChange={(e) =>
+                    setPaymentInfo({ ...paymentInfo, amount: e.target.value })
+                  }
+                  className="  w-[70%] h-[100%] pl-3  bg-gray-600 mb-4  rounded-2xl placeholder:text-gray-300 placeholder:text-xl placeholder:pl-2 outline-none"
+                />
+              </div>
+            </div>
+            <br />
+            <input
+              type="text"
+              placeholder="receiver's address"
+              onChange={(e) =>
+                setPaymentInfo({ ...paymentInfo, address: e.target.value })
+              }
+              className="m-3 mb-5 ml-2 p-3 w-[98%] bg-gray-600 rounded-2xl placeholder:text-gray-300 placeholder:text-sm placeholder:pl-2 outline-none text-sm pl-3"
+            />
+            <br />
+            {!loading ? (
+              <button
+                type="submit"
+                onClick={(e) => sendPayment(e)}
+                className="m-2 bg-[steelblue] w-[100%] p-2 rounded-2xl hover:bg-blue-400"
+              >
+                Send
+              </button>
+            ) : (
+              <div className="m-2 w-[100%] p-2 rounded-2xl bg-blue-900 text-center cursor-pointer">
+                Sending...
+              </div>
+            )}
+          </div>
         </form>
       </main>
     </div>
